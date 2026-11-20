@@ -2,7 +2,7 @@
 
 A browser app for making step-by-step assembly guides from STL files. It runs offline; all libraries are in `vendor/`. Free and open source under the MIT License.
 
-Guides can be exported as PDF, Markdown, or an interactive 3D web page. The web page uses the companion project [Guide Viewer](../_guide_viewer/), a single read-only HTML file that you can embed anywhere.
+Guides can be exported as PDF, Markdown, or an interactive 3D web page. The web page uses the companion project [Guide Viewer](https://github.com/hannabanaaahh/3D-guide-viewer), a single read-only HTML file that you can embed anywhere.
 
 ## Start
 
@@ -42,7 +42,7 @@ Your work is autosaved in the browser. Use **Save** to write a `.guide` project 
 6. **Export**
    - **PDF** contains a cover, table of contents, hole legend, parts list with thumbnails, section pages, and steps at 1 or 2 per page.
    - **Markdown** is either a zip with the `.md` file plus `images/` and `parts/` folders, or a single `.md` with the images embedded.
-   - **HTML** is one page with the interactive 3D guide: readers step through it, turn the model, and see the text, notes, hardware and photos for each step. Nothing can be edited. You can open it directly, host it, or embed it on any website with an `<iframe>`. It uses [Guide Viewer](../_guide_viewer/) (a copy is in `vendor/guide-viewer.html`) and loads three.js from a CDN, so readers need an internet connection.
+   - **HTML** is one page with the interactive 3D guide: readers step through it, turn the model, and see the text, notes, hardware and photos for each step. Nothing can be edited. You can open it directly, host it, or embed it on any website with an `<iframe>`. It uses [Guide Viewer](https://github.com/hannabanaaahh/3D-guide-viewer) (a copy is in `vendor/guide-viewer.html`) and loads three.js from a CDN, so readers need an internet connection.
    - **Preview** shows the guide before you export it.
    - The dashed frame in the viewport is exactly what the step picture will show. Its aspect comes from the picture size in the Export tab.
 
