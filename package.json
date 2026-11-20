@@ -1,0 +1,8 @@
+{
+  "name": "guide-builder",
+  "version": "1.0.0",
+  "description": "Browser app for making step-by-step 3D assembly guides from STL and 3MF files",
+  "license": "MIT",
+  "private": true,
+  "type": "module"
+}

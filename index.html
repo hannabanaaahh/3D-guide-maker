@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guide Builder</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22%3E%3Crect x=%222%22 y=%222%22 width=%2212%22 height=%2212%22 rx=%222%22 fill=%22%231c7ed6%22/%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/app.css">
+<script src="vendor/jszip.min.js"></script>
+<script src="vendor/jspdf.umd.min.js"></script>
+<script type="importmap">
+{ "imports": {
+  "three": "./vendor/three/three.module.js",
+  "three/addons/": "./vendor/three/addons/"
+} }
+</script>
+<script type="module" src="js/main.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">Guide Builder</div>
+  <div class="tb-group">
+    <button id="btn-new" title="New guide">New</button>
+    <button id="btn-open" title="Open .guide project">Open</button>
+    <button id="btn-save" title="Save project (Ctrl+S)">Save</button>
+    <button id="btn-saveas" title="Save as… (Ctrl+Shift+S)">Save as</button>
+  </div>
+  <div class="tb-group">
+    <button id="btn-stl" class="primary" title="Import one or more STL or 3MF files">＋ Import STL / 3MF</button>
+    <button id="btn-md" title="Import an existing Markdown guide (select the .md plus its images)">Import MD</button>
+  </div>
+  <div class="tb-group">
+    <button id="undo" title="Undo (Ctrl+Z)">↶</button>
+    <button id="redo" title="Redo (Ctrl+Y)">↷</button>
+  </div>
+  <span id="saved" class="muted small"></span>
+  <div class="spacer"></div>
+  <div class="tb-group">
+    <button id="btn-preview">Preview</button>
+    <button id="btn-pdf" class="primary">Export PDF</button>
+    <button id="btn-mdx">Export MD</button>
+    <button id="btn-html" title="Export a single HTML page with the interactive 3D guide (read-only, can be embedded on any website)">Export HTML</button>
+  </div>
+</header>
+
+<main class="layout">
+  <aside id="left">
+    <div class="panel">
+      <div class="panel-h">Guide outline <span class="muted small">drag steps to reorder</span></div>
+      <div id="outline" class="panel-b"></div>
+    </div>
+    <div class="panel grow">
+      <div class="panel-h">Parts in this step</div>
+      <div id="parts" class="panel-b"></div>
+    </div>
+  </aside>
+
+  <section id="center">
+    <div class="toolbar">
+      <div class="tb-group">
+        <button data-gizmo="translate" class="on" title="Move (W)">✥ Move</button>
+        <button data-gizmo="rotate" title="Rotate (E)">⟳ Rotate</button>
+        <button id="space" title="Gizmo axes: world or part-local">World</button>
+        <select id="snap-t" title="Move snap">
+          <option value="0">free</option><option value="0.5">0.5 mm</option><option value="1" selected>1 mm</option><option value="5">5 mm</option><option value="10">10 mm</option>
+        </select>
+        <select id="snap-r" title="Rotate snap">
+          <option value="0">free</option><option value="5">5°</option><option value="15" selected>15°</option><option value="45">45°</option><option value="90">90°</option>
+        </select>
+      </div>
+      <div class="tb-group">
+        <button data-mode="mate1" title="Mate: click a hole/face on the moving part, then the target hole/face">⇄ Mate</button>
+        <button data-mode="flat" title="Lay a face flat on the bed">▁ Lay flat</button>
+        <button data-mode="callout" title="Add a callout label">🏷 Callout</button>
+        <button data-mode="arrow" title="Add an arrow">➜ Arrow</button>
+        <button data-mode="addhole" title="Add a hole marker manually">◎ Hole</button>
+      </div>
+      <div class="tb-group">
+        <button id="holes-toggle" class="on" title="Show hole markers in this step">◎ Holes</button>
+        <button id="edges-toggle" class="on" title="Outline edges">▭ Edges</button>
+        <button id="grid-toggle" class="on" title="Grid (editor only unless enabled in Export)">▦ Grid</button>
+        <button id="propagate" class="on" title="Carry changes forward into later steps">⇢ Carry fwd</button>
+      </div>
+      <div class="tb-group">
+        <button data-view="iso" title="Isometric">Iso</button>
+        <button data-view="front">Front</button>
+        <button data-view="right">Right</button>
+        <button data-view="top">Top</button>
+        <button data-view="back">Back</button>
+        <button data-view="left">Left</button>
+        <button data-view="bottom">Bottom</button>
+        <button id="fit" title="Fit view (F)">Fit</button>
+        <button id="fit-sel" title="Fit selection">Fit sel</button>
+      </div>
+      <label class="tb-group explode" title="Explode parts apart in this step">Explode <input id="explode" type="range" min="0" max="1.5" step="0.05" value="0"></label>
+    </div>
+    <div id="viewport">
+      <div id="hint"></div>
+      <div id="dropzone">Drop STL / 3MF files, a .guide project, a Markdown guide or photos</div>
+    </div>
+    <div class="stepbar">
+      <button id="prev-step" title="Previous step (PgUp)">◀</button>
+      <span id="step-label"></span>
+      <button id="next-step" title="Next step (PgDn)">▶</button>
+      <button id="add-step" class="primary" title="New step continuing from this one">＋ New step</button>
+      <span class="muted small keys">W move · E rotate · F fit · H hide · Del hide/delete · Shift-click multi-select · Esc cancel</span>
+    </div>
+  </section>
+
+  <aside id="right">
+    <nav id="tabs">
+      <button data-tab="step">Step</button>
+      <button data-tab="sel">Selection</button>
+      <button data-tab="guide">Guide</button>
+      <button data-tab="holes">Hole types</button>
+      <button data-tab="export">Export</button>
+    </nav>
+    <div id="inspector"></div>
+  </aside>
+</main>
+
+<div id="modal" hidden></div>
+<div id="busy" hidden></div>
+<div id="toasts"></div>
+<datalist id="hw-names"></datalist>
+<input id="file-stl" type="file" accept=".stl,.3mf" multiple hidden>
+<input id="file-md" type="file" accept=".md,image/*" multiple hidden>
+<input id="file-project" type="file" accept=".guide,.zip" hidden>
+</body>
+</html>
